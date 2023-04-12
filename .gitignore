@@ -1,3 +1,4 @@
 .idea
 SDD/datasets
 SDD/README
+*__pycache__*
