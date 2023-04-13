@@ -27,7 +27,7 @@ class TrajDataset(dataset.Dataset):
         raw_data = raw_data[raw_data.index % self.img_step == 0]
         X = []
         Y = []
-        track_ids = raw_data["track_id"].unique()
+        track_ids = raw_data["track_id"].unique()[:5]
         
         for track_id in track_ids:
             print("opening track " + str(track_id))
@@ -75,9 +75,7 @@ class TrajDataset(dataset.Dataset):
         Y = self.Y[item]
         return {"X": X, "Y" : Y}
 
+    def __len__(self):
+        return len(self.X)
 
 
-if __name__ == "__main__":
-
-    myDataset = TrajDataset("bookstore/video0")
-    print(myDataset)
