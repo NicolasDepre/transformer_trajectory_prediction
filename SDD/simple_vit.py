@@ -123,8 +123,7 @@ class SimpleViT(nn.Module):
         return self.linear_head(x)
 
 
-dataset = TrajDataset("bookstore/video0")
-
+dataset = TrajDataset("datasets/bookstore/video0")
 
 
 model = SimpleViT()

@@ -38,7 +38,7 @@ for ind, row in data.iterrows():
     #print((left, top, right, bottom))
     #print((left//scale_factor, top//scale_factor, right//scale_factor, bottom//scale_factor))
     draw.rectangle((left//scale_factor, top//scale_factor, right//scale_factor, bottom//scale_factor), fill="black")
-    outname = f"{scene}/images/small_bw/{row.track_id:03d}_{frame:05d}.jpg"
+    outname = f"{scene}/images/small_bw/{row.track_id:03d}_{frame}.jpg"
     #print(outname)
     #image.show()
     img.save(outname)
