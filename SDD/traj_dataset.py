@@ -11,7 +11,7 @@ class TrajDataset(dataset.Dataset):
     to_tensor = transforms.ToTensor()
     cols = ["track_id", "xmin", "ymin", "xmax", "ymax", "frame", "lost", "occluded", "generated", "label"]
 
-    def __init__(self, data_folder, n_prev=4, n_next=2, img_step = 10):
+    def __init__(self, data_folder, n_prev=4, n_next=6, img_step = 10):
         self.data_folder = data_folder
         self.n_prev = n_prev
         self.n_next = n_next
@@ -23,11 +23,11 @@ class TrajDataset(dataset.Dataset):
 
     def process_data(self):
         raw_data = pd.read_csv(self.data_folder + "/annotations.txt", sep=" ", names=self.cols)
-        print(raw_data)
+        #print(raw_data)
         raw_data = raw_data[raw_data.index % self.img_step == 0]
         X = []
         Y = []
-        track_ids = raw_data["track_id"].unique()[:5]
+        track_ids = raw_data["track_id"].unique()[:1]
         
         for track_id in track_ids:
             print("opening track " + str(track_id))
@@ -39,13 +39,9 @@ class TrajDataset(dataset.Dataset):
                 X.append(x)  # add to dataset
                 y = traj.iloc[i + self.n_prev: i + self.n_prev + self.n_next][["xmin", "ymin", "xmax", "ymax"]]  # recuperer le grand truth à prédire
                 Y.append(Tensor(y.values)) # add to grand truth dataset
-        self.X = torch.stack(X,dim=0)
-        self.Y = torch.stack(Y,dim=0)
+        self.X = torch.stack(X, dim=0)
+        self.Y = torch.stack(Y, dim=0)
 
-        print(len(X))
-        print(X[0].shape)
-        print(self.X.shape)
-        print(self.Y.shape)
 
     def get_image_data(self, trajs):
         X_traj = Tensor()
