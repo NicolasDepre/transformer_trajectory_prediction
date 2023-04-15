@@ -11,7 +11,7 @@ class TrajDataset(dataset.Dataset):
     to_tensor = transforms.ToTensor()
     cols = ["track_id", "xmin", "ymin", "xmax", "ymax", "frame", "lost", "occluded", "generated", "label"]
 
-    def __init__(self, data_folder, n_prev=4, n_next=6, img_step = 10):
+    def __init__(self, data_folder,device, n_prev=4, n_next=6, img_step = 10):
         self.data_folder = data_folder
         self.n_prev = n_prev
         self.n_next = n_next
@@ -19,6 +19,7 @@ class TrajDataset(dataset.Dataset):
         self.X = Tensor()
         self.Y = Tensor()
         self.process_data()
+        self.device= device
 
 
     def process_data(self):
@@ -27,12 +28,11 @@ class TrajDataset(dataset.Dataset):
         raw_data = raw_data[raw_data.index % self.img_step == 0]
         X = []
         Y = []
-        track_ids = raw_data["track_id"].unique()[:1]
+        track_ids = raw_data["track_id"].unique()[:100]
         
         for track_id in track_ids:
             print("opening track " + str(track_id))
             traj = raw_data[raw_data["track_id"] == track_id]  # get all positions of track
-            # TODO OPTI ouverture images
             memo = {}
             for i in range(len(traj) - self.n_next - self.n_prev):
                 x = self.get_n_images_after_i(traj, self.n_prev, i,memo)
