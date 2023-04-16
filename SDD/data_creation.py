@@ -14,6 +14,7 @@ data = pd.read_csv(annotation_filename, sep=" ", names=cols)
 
 
 img_step = 10
+old_size = (1424, 1088)
 new_size = (256, 256)
 box_size = 16
 
@@ -28,6 +29,7 @@ new_annotations = pd.DataFrame(columns=cols)
 for ind, row in data.iterrows():
     if (ind % img_step != 0):
         continue
+
     frame = f"{row.frame:05d}"
     image_path = f"{scene}/frames/{frame}.jpg"
     outname = f"{output_folder}/{row.track_id:03d}_{frame}.jpg"
