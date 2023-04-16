@@ -15,7 +15,7 @@ data = pd.read_csv(annotation_filename, sep=" ", names=cols)
 
 img_step = 5
 new_size = (128, 128)
-box_size = 8
+box_size = 16
 
 output_folder = f"{scene}/{new_size[0]}_{new_size[1]}_{box_size}"
 try:
