@@ -13,7 +13,7 @@ cols = ["track_id", "xmin", "ymin", "xmax", "ymax", "frame", "lost", "occluded",
 data = pd.read_csv(annotation_filename, sep=" ", names=cols)
 
 # Parameters of transform
-img_step = 1
+img_step = 5
 old_size = (1424, 1088)
 new_size = (128, 128)
 box_size = 8
@@ -28,18 +28,19 @@ y_scale = old_size[1] / new_size[1]
 data["x"] = round(((data["xmax"] + data["xmin"]) / 2) / x_scale, 2)
 data["y"] = round(((data["ymax"] + data["ymin"]) / 2) / y_scale, 2)
 
-data["xmax"] = round(data["x"] + (box_size/2)).astype(int)
-data["xmin"] = round(data["x"] + 1 - (box_size/2)).astype(int)
-data["ymax"] = round(data["y"] + (box_size/2)).astype(int)
-data["ymin"] = round(data["y"] + 1 - (box_size/2)).astype(int)
+data["xmin"] = round(data["x"] - (box_size/2)).astype(int)
+data["xmax"] = round(data["xmin"] + (box_size-1)).astype(int)
+data["ymin"] = round(data["y"] - (box_size/2)).astype(int)
+data["ymax"] = round(data["ymin"] + (box_size-1)).astype(int)
 
 output_folder = f"{scene}/{new_size[0]}_{new_size[1]}_{box_size}"
-data.to_csv(output_folder + "/annotations_" + str(img_step) + ".txt", sep=" ", index=False)
 
 try:
     os.mkdir(output_folder)
 except FileExistsError as e:
     pass
+
+data.to_csv(output_folder + "/annotations_" + str(img_step) + ".txt", sep=" ", index=False)
 
 
 for ind, row in data.iterrows():
