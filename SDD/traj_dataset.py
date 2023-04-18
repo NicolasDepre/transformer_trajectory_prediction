@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import torch
 from torch import nn, Tensor
@@ -11,24 +12,32 @@ class TrajDataset(dataset.Dataset):
     to_tensor = transforms.ToTensor()
     cols = ["track_id", "xmin", "ymin", "xmax", "ymax", "frame", "lost", "occluded", "generated", "label"]
 
-    def __init__(self, data_folder,device, n_prev=4, n_next=6, img_step = 10):
+    def __init__(self, data_folder,device, n_prev=4, n_next=6, img_step = 10,train=True):
         self.data_folder = data_folder
         self.n_prev = n_prev
         self.n_next = n_next
         self.img_step = img_step
         self.X = Tensor()
         self.Y = Tensor()
+        self.device = device
+        self.train = train
         self.process_data()
-        self.device= device
+
 
 
     def process_data(self):
         raw_data = pd.read_csv(self.data_folder + "/annotations.txt", sep=" ", names=self.cols)
-        #print(raw_data)
         raw_data = raw_data[raw_data.index % self.img_step == 0]
+
+        raw_data[["xmin", "ymin", "xmax", "ymax"]] = self.normalize(raw_data[["xmin", "ymin", "xmax", "ymax"]])
         X = []
         Y = []
-        track_ids = raw_data["track_id"].unique()[:100]
+
+        if self.train:
+            track_ids = raw_data["track_id"].unique()[:-20]
+        else:
+            track_ids = raw_data["track_id"].unique()[-20:]
+
         
         for track_id in track_ids:
             print("opening track " + str(track_id))
@@ -37,11 +46,13 @@ class TrajDataset(dataset.Dataset):
             for i in range(len(traj) - self.n_next - self.n_prev):
                 x = self.get_n_images_after_i(traj, self.n_prev, i,memo)
                 X.append(x)  # add to dataset
-                y = traj.iloc[i + self.n_prev: i + self.n_prev + self.n_next][["xmin", "ymin", "xmax", "ymax"]]  # recuperer le grand truth à prédire
+                y = traj.iloc[i + self.n_prev: i + self.n_prev + self.n_next][["xmin", "ymin", "xmax", "ymax"]] # recuperer le grand truth à prédire
                 Y.append(Tensor(y.values)) # add to grand truth dataset
         self.X = torch.stack(X, dim=0)
         self.Y = torch.stack(Y, dim=0)
 
+    def normalize(self,df):
+        return (df-df.min())/(df.max()-df.min())
 
     def get_image_data(self, trajs):
         X_traj = Tensor()
@@ -61,8 +72,11 @@ class TrajDataset(dataset.Dataset):
                 img = memo[path]
             else:
                 img = Image.open(f"{self.data_folder}/images/small_bw/{track_id:03d}_{frame:05d}.jpg")
+                img = img.resize((128,128))
                 memo[path] = img
+
             img_tensor = self.to_tensor(img)
+            img_tensor /= torch.norm(img_tensor,p=2)
             X.append(img_tensor)
         return torch.cat(X)
     
