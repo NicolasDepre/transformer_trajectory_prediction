@@ -80,3 +80,8 @@ class TrajDataset(dataset.Dataset):
 
     def get_image_size(self):
         return self.src[0].size()[1:]
+
+    def get_dataset_infos(self):
+        return {"image_size":self.get_image_size(),
+                "n_prev": self.n_prev,
+                "n_next": self.n_next}

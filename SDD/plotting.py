@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-
+import os
 
 def make_plot(title, training, validation=None, ylim=None):
     os.system("mkdir plots")
