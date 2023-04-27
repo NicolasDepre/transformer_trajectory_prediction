@@ -2,8 +2,6 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import cv2
-import numpy as np
 from PIL import Image, ImageDraw
 
 scene = "datasets/bookstore/video0"
@@ -13,9 +11,9 @@ cols = ["track_id", "xmin", "ymin", "xmax", "ymax", "frame", "lost", "occluded",
 data = pd.read_csv(annotation_filename, sep=" ", names=cols)
 
 # Parameters of transform
-img_step = 10
+img_step = 5
 old_size = (1424, 1088)
-new_size = (64, 64)
+new_size = (128, 128)
 box_size = 8
 
 
@@ -62,16 +60,6 @@ for ind, row in data.iterrows():
         draw.rectangle((left, top, right, bottom), fill="black")
 
         img.save(outname)
-
-
-
-
-
-
-
-
-
-
 
 
 
