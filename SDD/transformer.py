@@ -12,10 +12,6 @@ from einops.layers.torch import Rearrange
 
 from plotting import *
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print("device is ", device)
-
-
 def pair(t):
     return t if isinstance(t, tuple) else (t, t)
 
