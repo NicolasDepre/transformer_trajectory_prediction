@@ -67,7 +67,6 @@ class TrajDataset(dataset.Dataset):
         return img
 
     def normalize_coords(self, df):
-        return df
         return (df - df.min()) / (df.max() - df.min())
 
     def get_n_images_after_i(self, traj, n, i, memo):
@@ -82,7 +81,6 @@ class TrajDataset(dataset.Dataset):
                 img = Image.open(f"{self.data_folder}/{track_id:03d}_{frame:05d}.jpg")
                 memo[path] = img
             img_tensor = self.to_tensor(img)
-            print(img_tensor)
             X.append(img_tensor)
         return torch.cat(X)
 
