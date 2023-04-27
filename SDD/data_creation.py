@@ -1,10 +1,6 @@
 import os
 import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-import cv2
-import numpy as np
-from PIL import Image, ImageDraw
+
 
 scene = "datasets/bookstore/video0"
 annotation_filename = scene + "/annotations.txt"
@@ -13,9 +9,9 @@ cols = ["track_id", "xmin", "ymin", "xmax", "ymax", "frame", "lost", "occluded",
 data = pd.read_csv(annotation_filename, sep=" ", names=cols)
 
 
-img_step = 10
-new_size = (256, 256)
-box_size = 16
+img_step = 30
+new_size = (64, 64)
+box_size = 8
 
 output_folder = f"{scene}/{new_size[0]}_{new_size[1]}_{box_size}"
 try:
@@ -28,6 +24,8 @@ new_annotations = pd.DataFrame(columns=cols)
 for ind, row in data.iterrows():
     if (ind % img_step != 0):
         continue
+
+    """
     frame = f"{row.frame:05d}"
     image_path = f"{scene}/frames/{frame}.jpg"
     outname = f"{output_folder}/{row.track_id:03d}_{frame}.jpg"
@@ -53,6 +51,9 @@ for ind, row in data.iterrows():
     row.xmin = left
     row.ymin = top
     row.ymax = bottom
+    """
+
     new_annotations.loc[ind] = row
 
+print(output_folder + "/annotations_" + str(img_step) + ".txt")
 new_annotations.to_csv(output_folder + "/annotations_" + str(img_step) + ".txt", sep=" ", index=False)
