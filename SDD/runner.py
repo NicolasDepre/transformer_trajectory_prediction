@@ -53,7 +53,7 @@ def parse_args():
     parser.add_argument('--mlp_dim', type=int, default=2048, help='Dimension of the MLP in the Transformer')
     parser.add_argument('--dim_head', type=int, default=64, help='Dimension of each head in the multi-head attention')
     parser.add_argument('--n_epoch', type=int, default=100, help='Number of epochs to train the model')
-    parser.add_argument('--teacher_forcing', type=bool, default=True, help='Teacher forcing activated')
+    parser.add_argument('--teacher_forcing', type=int, default=5, help='Number of epochs where teacher forcing is used')
     
     args = parser.parse_args()
     return args
