@@ -31,29 +31,60 @@ Args:
     20) teacher_forcing
 """
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='Description of your program')
+
+    parser.add_argument('--batch_size', type=int, default=10, help='Batch size for training')
+    parser.add_argument('--lr', type=float, default=0.01, help='Learning rate for optimizer')
+    parser.add_argument('--gpu', type=int, default=0, help='ID of the GPU to use')
+    parser.add_argument('--optimizer_name', type=str, default='Adam', help='Name of the optimizer')
+    parser.add_argument('--n_next', type=int, default=8, help='Number of next frames to predict')
+    parser.add_argument('--n_prev', type=int, default=8, help='Number of previous frames to use for prediction')
+    parser.add_argument('--train_prop', type=float, default=0.7, help='Proportion of data to use for training')
+    parser.add_argument('--val_prop', type=float, default=0.15, help='Proportion of data to use for validation')
+    parser.add_argument('--test_prop', type=float, default=0.15, help='Proportion of data to use for testing')
+    parser.add_argument('--img_step', type=int, default=20, help='Frame step size')
+    parser.add_argument('--model_dimension', type=int, default=512, help='Dimension of the model')
+    parser.add_argument('--patch_size', type=int, default=8, help='Size of the patches')
+    parser.add_argument('--img_size', type=int, default=64, help='Size of the input frames')
+    parser.add_argument('--patch_depth', type=int, default=3, help='Number of color channels for patches')
+    parser.add_argument('--model_depth', type=int, default=6, help='Depth of the model')
+    parser.add_argument('--n_heads', type=int, default=8, help='Number of heads for the multi-head attention')
+    parser.add_argument('--mlp_dim', type=int, default=2048, help='Dimension of the MLP in the Transformer')
+    parser.add_argument('--dim_head', type=int, default=64, help='Dimension of each head in the multi-head attention')
+    parser.add_argument('--n_epoch', type=int, default=100, help='Number of epochs to train the model')
+    parser.add_argument('--teacher_forcing', type=bool, default=True, help='Teacher forcing activated')
+    
+    args = parser.parse_args()
+    return args
+
+
+
 if __name__ == "__main__":
 
-    args = sys.argv
-    batch_size = int(args[1])
-    lr = float(args[2])
-    gpu = args[3]
-    optimizer_name = args[4]
-    n_next = int(args[5])
-    n_prev = int(args[6])
-    train_prop = float(args[7])
-    val_prop = float(args[8])
-    test_prop = float(args[9])
-    img_step = int(args[10])
-    model_dimension = int(args[11])
-    patch_size = eval(args[12])
-    img_size = eval(args[13])
-    patch_depth = int(args[14])
-    model_depth = int(args[15])
-    n_heads = int(args[16])
-    mlp_dim = int(args[17])
-    dim_head = int(args[18])
-    n_epoch = int(args[19])
-    teacher_forcing = int(args[20])
+    args = parse_args()
+    print(args)
+
+    batch_size = args.batch_size
+    lr = args.lr
+    gpu = args.gpu
+    optimizer_name = args.optimizer_name
+    n_next = args.n_next
+    n_prev = args.n_prev
+    train_prop = args.train_prop
+    val_prop = args.val_prop
+    test_prop = args.test_prop
+    img_step = args.img_step
+    model_dimension = args.model_dimension
+    patch_size = args.patch_size
+    img_size = args.img_size
+    patch_depth = args.patch_depth
+    model_depth = args.model_depth
+    n_heads = args.n_heads
+    mlp_dim = args.mlp_dim
+    dim_head = args.dim_head
+    n_epoch = args.n_epoch
+    teacher_forcing = args.teacher_forcing
 
     device = device = f'cuda:{gpu}' if torch.cuda.is_available() else 'cpu'
 
