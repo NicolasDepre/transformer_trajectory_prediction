@@ -9,7 +9,7 @@ cols = ["track_id", "xmin", "ymin", "xmax", "ymax", "frame", "lost", "occluded",
 data = pd.read_csv(annotation_filename, sep=" ", names=cols)
 
 
-img_step = 30
+img_step = 60
 new_size = (64, 64)
 box_size = 8
 
