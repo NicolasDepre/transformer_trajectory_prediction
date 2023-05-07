@@ -3,19 +3,34 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image, ImageDraw
+import sys
 
-scene = "datasets/bookstore/video0"
+
+
+#scene = "datasets/bookstore/video0"
+scene = sys.argv[1]
+print(scene)
 annotation_filename = scene + "/annotations.txt"
-
 cols = ["track_id", "xmin", "ymin", "xmax", "ymax", "frame", "lost", "occluded", "generated", "label"]
 data = pd.read_csv(annotation_filename, sep=" ", names=cols)
 
-# Parameters of transform
-img_step = 5
-old_size = (1424, 1088)
-new_size = (128, 128)
-box_size = 8
 
+def get_old_size(scene):
+    image_path = f"{scene}/frames/00001.jpg"
+    img = Image.open(image_path)
+    return img.size
+
+
+# Parameters of transform
+img_step = int(sys.argv[2])
+new_size = (int(sys.argv[3]), int(sys.argv[3]))
+box_size = int(sys.argv[4])
+old_size = get_old_size(scene)
+
+output_folder = f"{scene}/{new_size[0]}_{new_size[1]}_{box_size}"
+if os.path.exists(output_folder + "/annotations_" + str(img_step) + ".txt"):
+    print("already computed : " + output_folder + "/annotations_" + str(img_step))
+    exit(0)
 
 # Computation of new annotations
 data = data[data.index % img_step == 0]
@@ -31,7 +46,6 @@ data["xmax"] = round(data["xmin"] + (box_size-1)).astype(int)
 data["ymin"] = round(data["y"] - (box_size/2)).astype(int)
 data["ymax"] = round(data["ymin"] + (box_size-1)).astype(int)
 
-output_folder = f"{scene}/{new_size[0]}_{new_size[1]}_{box_size}"
 
 try:
     os.mkdir(output_folder)
@@ -60,9 +74,6 @@ for ind, row in data.iterrows():
         draw.rectangle((left, top, right, bottom), fill="black")
 
         img.save(outname)
-
-
-
 
 
 
