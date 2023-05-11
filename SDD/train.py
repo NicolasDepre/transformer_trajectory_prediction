@@ -25,7 +25,7 @@ class Trainer:
         self.loss_evolution = []
         self.test_evolution = []
         self.validation_evolution = []
-        self.save_name = f"epochs_{epochs}_lr_{lr}-{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}.dict"
+        self.save_name = f"/waldo/walban/student_datasets/arfranck/model_saves/epochs_{epochs}_lr_{lr}-{datetime.now().strftime('%d-%m-%Y-%H:%M:%S')}.dict"
 
         wandb_config["save_name"] = self.save_name
 
@@ -79,7 +79,9 @@ class Trainer:
             self.loss_evolution.append(loss_evolution)
             self.validation()
         self.test()
-        torch.save(model.state_dict(), self.save_name)
+        torch.save(model.state_dict(), self.save_name,_use_new_zipfile_serialization=False)
+        #model_scripted = torch.jit.script(model) # Export to TorchScript
+        #model_scripted.save(self.save_name) # Save
 
 
 
@@ -104,7 +106,6 @@ class Trainer:
                     pred,future = model(X_val,future,train=False)
 
                 loss = criterion(pred, Y_val)
-                print(f"Val shape: {pred.shape}")
                 val_loss.append(loss)
                 wandb.log(
                     {

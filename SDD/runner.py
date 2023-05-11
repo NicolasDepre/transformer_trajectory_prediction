@@ -6,6 +6,7 @@ from torch.utils.data import random_split, DataLoader
 from torch.optim import *
 from torch.nn import MSELoss
 import torch
+import argparse
 
 """
 Args:
@@ -89,20 +90,26 @@ if __name__ == "__main__":
     device = device = f'cuda:{gpu}' if torch.cuda.is_available() else 'cpu'
 
     size = "64_64_8"
-    folders = ["bookstore/video0/"]
-    n_trajs = [(0, 5)]
-    data_folders = ["datasets/" + folder + size for folder in folders]
+    folders = [f"coupa/video{k}/" for k in range(4)]
+    folders += [f"quad/video{k}/" for k in range(2)]
+    folders += [f"gates/video{k}/" for k in range(9)]
+    folders += [f"deathCircle/video{k}/" for k in range(5)]
+    folders += [f"little/video{k}/" for k in range(4)]
+    folders += [f"nexus/video{k}/" for k in range(10)]
 
+    n_trajs = [(0, -1) for k in range(len(folders))]
+    data_folders = ["/waldo/walban/student_datasets/arfranck/SDD/scenes/" + folder + size for folder in folders]
+    
     dataset = TrajDataset(data_folders, n_trajs=n_trajs, n_prev=n_prev, n_next=n_next, img_step=img_step)
     train_data, validation_data, test_data = random_split(dataset, [train_prop, val_prop, test_prop])
-
+    
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(validation_data, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
 
     model = SimpleViT(image_size=img_size, image_patch_size=patch_size, frames=n_prev,
                       frame_patch_size=patch_depth, dim=model_dimension, depth=model_depth, mlp_dim=mlp_dim,
-                      device=device, dim_head=dim_head)
+                      device=device, dim_head=dim_head,heads=n_heads)
     if optimizer_name == "adam":
         optimizer = Adam(model.parameters(), lr=lr)
     elif optimizer_name == "SGD":
@@ -129,7 +136,11 @@ if __name__ == "__main__":
             "patch_size": patch_size,
             "n_prev": n_prev,
             "n_next": n_next,
-            "model_dimension": model_dimension
+            "model_dimension": model_dimension,
+            "train_length": len(train_loader),
+            "val_length": len(val_loader),
+            "test_length": len(test_loader),
+            "heads": n_heads,
         }
     configuration = {
 
