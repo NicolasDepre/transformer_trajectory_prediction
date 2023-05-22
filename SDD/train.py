@@ -43,6 +43,7 @@ class Trainer:
 
         for epoch in range(self.epochs):
             loss_evolution = []
+            print(f"Epoch {epoch}")
             model.train()
             for train_batch in self.train_data:
 
@@ -77,6 +78,8 @@ class Trainer:
                 )
 
             self.loss_evolution.append(loss_evolution)
+            if epoch % 10 == 0 and epoch > 0:
+                torch.save(model.state_dict(), self.save_name,_use_new_zipfile_serialization=False)
             self.validation()
         self.test()
         torch.save(model.state_dict(), self.save_name,_use_new_zipfile_serialization=False)
@@ -87,7 +90,6 @@ class Trainer:
 
     def validation(self):
 
-        print("validate")
 
         with torch.no_grad():
 
