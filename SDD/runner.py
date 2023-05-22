@@ -90,12 +90,13 @@ if __name__ == "__main__":
     device = device = f'cuda:{gpu}' if torch.cuda.is_available() else 'cpu'
 
     size = "64_64_8"
-    folders = [f"coupa/video{k}/" for k in range(4)]
-    folders += [f"quad/video{k}/" for k in range(2)]
-    folders += [f"gates/video{k}/" for k in range(9)]
-    folders += [f"deathCircle/video{k}/" for k in range(5)]
-    folders += [f"little/video{k}/" for k in range(4)]
-    folders += [f"nexus/video{k}/" for k in range(10)]
+    folders = [f"bookstore/video{k}/" for k in range(2)]
+    #folders += [f"coupa/video{k}/" for k in range(4)]
+    #folders += [f"quad/video{k}/" for k in range(2)]
+    #folders += [f"gates/video{k}/" for k in range(9)]
+    #folders += [f"deathCircle/video{k}/" for k in range(5)]
+    #folders += [f"little/video{k}/" for k in range(4)]
+    #folders += [f"nexus/video{k}/" for k in range(10)]
 
     n_trajs = [(0, -1) for k in range(len(folders))]
     data_folders = ["/waldo/walban/student_datasets/arfranck/SDD/scenes/" + folder + size for folder in folders]
@@ -119,7 +120,7 @@ if __name__ == "__main__":
     else:
         raise Exception(f"Optimiser {optimizer} is not handled")
     mse = MSELoss()
-    criterion = lambda x,y: torch.rsqrt(mse(x,y))
+    criterion = MSELoss()
 
     wandb_config = {
             "device": device,
