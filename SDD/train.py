@@ -41,6 +41,8 @@ class Trainer:
         criterion = self.criterion
         model = self.model
 
+        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.95)
+
         for epoch in range(self.epochs):
             loss_evolution = []
             print(f"Epoch {epoch}")
@@ -81,6 +83,8 @@ class Trainer:
             if epoch % 10 == 0 and epoch > 0:
                 torch.save(model.state_dict(), self.save_name,_use_new_zipfile_serialization=False)
             self.validation()
+            
+            scheduler.step()
         self.test()
         torch.save(model.state_dict(), self.save_name,_use_new_zipfile_serialization=False)
         #model_scripted = torch.jit.script(model) # Export to TorchScript
