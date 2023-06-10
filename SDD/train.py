@@ -28,11 +28,20 @@ class Trainer:
         self.save_name = f"/waldo/walban/student_datasets/arfranck/model_saves/epochs_{epochs}_lr_{lr}-{datetime.now().strftime('%d-%m-%Y-%H:%M:%S')}.dict"
 
         wandb_config["save_name"] = self.save_name
+        print("Init Wandb")
 
-        wandb.init(
-            project="depren",
-            config= wandb_config
-        )
+        try:
+            wandb.init(
+                project="depren",
+                config= wandb_config
+            )
+        except:
+            print("Error with wandb trying a second time")
+            wandb.init(
+                project="depren",
+                config=wandb_config
+            )
+
 
 
     def train(self):
@@ -78,7 +87,7 @@ class Trainer:
                 )
 
             self.loss_evolution.append(loss_evolution)
-            if epoch % 10 == 0 and epoch > 0:
+            if epoch % 1 == 0:
                 torch.save(model.state_dict(), self.save_name,_use_new_zipfile_serialization=False)
             self.validation()
         self.test()
