@@ -48,6 +48,7 @@ def parse_args():
     parser.add_argument('--model_dimension', type=int, default=512, help='Dimension of the model')
     parser.add_argument('--patch_size', type=int, default=8, help='Size of the patches')
     parser.add_argument('--img_size', type=int, default=64, help='Size of the input frames')
+    parser.add_argument('--block_size', type=int, default=8, help='Size of the block on the images')
     parser.add_argument('--patch_depth', type=int, default=3, help='Number of color channels for patches')
     parser.add_argument('--model_depth', type=int, default=6, help='Depth of the model')
     parser.add_argument('--n_heads', type=int, default=8, help='Number of heads for the multi-head attention')
@@ -79,6 +80,7 @@ if __name__ == "__main__":
     model_dimension = args.model_dimension
     patch_size = args.patch_size
     img_size = args.img_size
+    block_size = args.block_size
     patch_depth = args.patch_depth
     model_depth = args.model_depth
     n_heads = args.n_heads
@@ -89,8 +91,8 @@ if __name__ == "__main__":
 
     device = device = f'cuda:{gpu}' if torch.cuda.is_available() else 'cpu'
 
-    size = "64_64_8"
-    folders = [f"bookstore/video{k}/" for k in range(2)]
+    size = f"{img_size}_{img_size}_{block_size}"
+    folders = [f"bookstore/video{k}/" for k in range(6)]
     #folders += [f"coupa/video{k}/" for k in range(4)]
     #folders += [f"quad/video{k}/" for k in range(2)]
     #folders += [f"gates/video{k}/" for k in range(9)]
