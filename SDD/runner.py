@@ -48,6 +48,7 @@ def parse_args():
     parser.add_argument('--model_dimension', type=int, default=512, help='Dimension of the model')
     parser.add_argument('--patch_size', type=int, default=8, help='Size of the patches')
     parser.add_argument('--img_size', type=int, default=64, help='Size of the input frames')
+    parser.add_argument('--block_size', type=int, default=8, help='Size of the block in the frames')
     parser.add_argument('--patch_depth', type=int, default=3, help='Number of color channels for patches')
     parser.add_argument('--model_depth', type=int, default=6, help='Depth of the model')
     parser.add_argument('--n_heads', type=int, default=8, help='Number of heads for the multi-head attention')
@@ -55,7 +56,7 @@ def parse_args():
     parser.add_argument('--dim_head', type=int, default=64, help='Dimension of each head in the multi-head attention')
     parser.add_argument('--n_epoch', type=int, default=100, help='Number of epochs to train the model')
     parser.add_argument('--teacher_forcing', type=int, default=5, help='Number of epochs where teacher forcing is used')
-    
+    parser.add_argument('--name', type=str,default="",help="Name of the run on OneDB")    
     args = parser.parse_args()
     return args
 
@@ -79,6 +80,7 @@ if __name__ == "__main__":
     model_dimension = args.model_dimension
     patch_size = args.patch_size
     img_size = args.img_size
+    block_size = args.block_size
     patch_depth = args.patch_depth
     model_depth = args.model_depth
     n_heads = args.n_heads
@@ -86,15 +88,16 @@ if __name__ == "__main__":
     dim_head = args.dim_head
     n_epoch = args.n_epoch
     teacher_forcing = args.teacher_forcing
+    name = args.name
 
     device = device = f'cuda:{gpu}' if torch.cuda.is_available() else 'cpu'
 
-    size = "64_64_8"
-    folders = [f"bookstore/video{k}/" for k in range(2)]
+    size = f"{img_size}_{img_size}_{block_size}"
+    #folders = [f"bookstore/video{k}/" for k in range(1)]
     #folders += [f"coupa/video{k}/" for k in range(4)]
     #folders += [f"quad/video{k}/" for k in range(2)]
     #folders += [f"gates/video{k}/" for k in range(9)]
-    #folders += [f"deathCircle/video{k}/" for k in range(5)]
+    folders  = [f"deathCircle/video{k}/" for k in range(1,2)]
     #folders += [f"little/video{k}/" for k in range(4)]
     #folders += [f"nexus/video{k}/" for k in range(10)]
 
@@ -111,6 +114,7 @@ if __name__ == "__main__":
     model = SimpleViT(image_size=img_size, image_patch_size=patch_size, frames=n_prev,
                       frame_patch_size=patch_depth, dim=model_dimension, depth=model_depth, mlp_dim=mlp_dim,
                       device=device, dim_head=dim_head,heads=n_heads)
+    #model.load_state_dict(torch.load("/waldo/walban/student_datasets/arfranck/model_saves/epochs_100_lr_1e-05-30-05-2023-16:14:43.dict"))
     if optimizer_name == "adam":
         optimizer = Adam(model.parameters(), lr=lr)
     elif optimizer_name == "SGD":
@@ -142,6 +146,7 @@ if __name__ == "__main__":
             "val_length": len(val_loader),
             "test_length": len(test_loader),
             "heads": n_heads,
+            "name" : name,
         }
     configuration = {
 
