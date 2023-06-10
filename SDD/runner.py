@@ -93,11 +93,7 @@ if __name__ == "__main__":
     device = device = f'cuda:{gpu}' if torch.cuda.is_available() else 'cpu'
 
     size = f"{img_size}_{img_size}_{block_size}"
-<<<<<<< HEAD
     #folders = [f"bookstore/video{k}/" for k in range(1)]
-=======
-    folders = [f"bookstore/video{k}/" for k in range(6)]
->>>>>>> b9b1e7d9c076e2c98181c5d60eda5e1bbe8067c3
     #folders += [f"coupa/video{k}/" for k in range(4)]
     #folders += [f"quad/video{k}/" for k in range(2)]
     #folders += [f"gates/video{k}/" for k in range(9)]
