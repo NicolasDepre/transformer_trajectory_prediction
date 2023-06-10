@@ -1,4 +1,3 @@
-
 import pandas as pd
 import torch
 from torch import nn, Tensor
@@ -46,10 +45,10 @@ class TrajDataset(dataset.Dataset):
                     # n_prev images used to predict
                     x = self.get_n_images_after_i(folder, traj, self.n_prev, i, memo)
                     src.append(x)
-                    # images that should be predicted
+                    # coords of the previous images
                     c = traj.iloc[i: i + self.n_prev][["x", "y"]]
                     coords.append(Tensor(c.values))
-                    # bounding boxes inside predicted images
+                    # images that should be predicted
                     y = traj.iloc[i + self.n_prev: i + self.n_prev + self.n_next][["x", "y"]]  # recuperer le grand truth à prédire
                     tgt.append(Tensor(y.values)) # add to ground truth dataset
 
@@ -58,6 +57,7 @@ class TrajDataset(dataset.Dataset):
         self.tgt = self.normalize_coords(torch.stack(tgt, dim=0))
 
     def normalize_img(self, img):
+        #return img / img.norm(p=2)
         return img
 
     def normalize_coords(self, tgt):
@@ -97,4 +97,3 @@ class TrajDataset(dataset.Dataset):
                 "n_next": self.n_next,
                 "block_size": self.block_size
                 }
-
