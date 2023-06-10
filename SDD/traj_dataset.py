@@ -58,7 +58,7 @@ class TrajDataset(dataset.Dataset):
         self.tgt = self.normalize_coords(torch.stack(tgt, dim=0))
 
     def normalize_img(self, img):
-        return img / img.norm(p=2)
+        return img
 
     def normalize_coords(self, tgt):
         return tgt / self.get_image_size()[0]
