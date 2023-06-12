@@ -19,6 +19,7 @@ class Trainer:
         self.val_data = val_data
         self.criterion = criterion
         self.optimizer = optimizer
+        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, [10, 30], gamma=0.1)
         self.epochs = epochs
         self.teacher_forcing = teacher_forcing
 
@@ -49,15 +50,14 @@ class Trainer:
         optimizer = self.optimizer
         criterion = self.criterion
         model = self.model
-
-        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.95)
-
+        scheduler = self.scheduler
+        update_step = -1
         for epoch in range(self.epochs):
             loss_evolution = []
             print(f"Epoch {epoch}")
             model.train()
-            for train_batch in self.train_data:
-
+            for step, train_batch in enumerate(self.train_data):
+                update_step += 1
                 # Don't know if batch size is needed
 
                 X_train = train_batch["src"].to(self.device)
@@ -84,7 +84,9 @@ class Trainer:
 
                 wandb.log(
                     {
-                        "train_loss": loss
+                        "train_loss": loss,
+                        "step": update_step,
+                        "lr": scheduler.get_last_lr()[0]
                     }
                 )
 
@@ -92,8 +94,8 @@ class Trainer:
             if epoch % 1 == 0:
                 torch.save(model.state_dict(), self.save_name,_use_new_zipfile_serialization=False)
             self.validation()
-            
             scheduler.step()
+
         self.test()
         torch.save(model.state_dict(), self.save_name,_use_new_zipfile_serialization=False)
         #model_scripted = torch.jit.script(model) # Export to TorchScript
