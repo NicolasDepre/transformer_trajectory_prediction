@@ -105,7 +105,7 @@ if __name__ == "__main__":
     data_folders = ["/waldo/walban/student_datasets/arfranck/SDD/scenes/" + folder + size for folder in folders]
     
     dataset = TrajDataset(data_folders, n_trajs=n_trajs, n_prev=n_prev, n_next=n_next, img_step=img_step)
-    train_data, validation_data, test_data = random_split(dataset, [train_prop, val_prop, test_prop])
+    train_data, validation_data, test_data = random_split(dataset, [train_prop, val_prop, test_prop],generator=torch.Generator().manual_seed(42))
     
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(validation_data, batch_size=batch_size, shuffle=True)
