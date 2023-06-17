@@ -74,17 +74,3 @@ for ind, row in data.iterrows():
         draw.rectangle((left, top, right, bottom), fill="black")
 
         img.save(outname)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
