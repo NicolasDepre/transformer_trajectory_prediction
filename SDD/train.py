@@ -33,14 +33,16 @@ class Trainer:
 
         try:
             wandb.init(
-                project="depren",
-                config= wandb_config
+                project = "thesis_official_runs",
+                config = wandb_config,
+                name = wandb_config['name']
             )
         except:
             print("Error with wandb trying a second time")
             wandb.init(
-                project="depren",
-                config=wandb_config
+                project = "thesis_official_runs",
+                config = wandb_config,
+                name = wandb_config['name']
             )
 
 
@@ -94,7 +96,7 @@ class Trainer:
             if epoch % 1 == 0:
                 torch.save(model.state_dict(), self.save_name,_use_new_zipfile_serialization=False)
             self.validation()
-            scheduler.step()
+            #scheduler.step()
 
         self.test()
         torch.save(model.state_dict(), self.save_name,_use_new_zipfile_serialization=False)

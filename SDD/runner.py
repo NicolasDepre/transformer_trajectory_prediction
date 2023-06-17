@@ -7,6 +7,7 @@ from torch.optim import *
 from torch.nn import MSELoss
 import torch
 import argparse
+import pandas as pd
 
 """
 Args:
@@ -41,22 +42,23 @@ def parse_args():
     parser.add_argument('--optimizer_name', type=str, default='Adam', help='Name of the optimizer')
     parser.add_argument('--n_next', type=int, default=8, help='Number of next frames to predict')
     parser.add_argument('--n_prev', type=int, default=8, help='Number of previous frames to use for prediction')
-    parser.add_argument('--train_prop', type=float, default=0.7, help='Proportion of data to use for training')
-    parser.add_argument('--val_prop', type=float, default=0.15, help='Proportion of data to use for validation')
-    parser.add_argument('--test_prop', type=float, default=0.15, help='Proportion of data to use for testing')
-    parser.add_argument('--img_step', type=int, default=20, help='Frame step size')
+    parser.add_argument('--train_prop', type=float, default=0.9, help='Proportion of data to use for training')
+    parser.add_argument('--val_prop', type=float, default=0.05, help='Proportion of data to use for validation')
+    parser.add_argument('--test_prop', type=float, default=0.05, help='Proportion of data to use for testing')
+    parser.add_argument('--img_step', type=int, default=30, help='Frame step size')
     parser.add_argument('--model_dimension', type=int, default=512, help='Dimension of the model')
     parser.add_argument('--patch_size', type=int, default=8, help='Size of the patches')
     parser.add_argument('--img_size', type=int, default=64, help='Size of the input frames')
     parser.add_argument('--block_size', type=int, default=8, help='Size of the block in the frames')
-    parser.add_argument('--patch_depth', type=int, default=3, help='Number of color channels for patches')
+    parser.add_argument('--patch_depth', type=int, default=2, help='Patch dept')
     parser.add_argument('--model_depth', type=int, default=6, help='Depth of the model')
     parser.add_argument('--n_heads', type=int, default=8, help='Number of heads for the multi-head attention')
     parser.add_argument('--mlp_dim', type=int, default=2048, help='Dimension of the MLP in the Transformer')
     parser.add_argument('--dim_head', type=int, default=64, help='Dimension of each head in the multi-head attention')
     parser.add_argument('--n_epoch', type=int, default=100, help='Number of epochs to train the model')
     parser.add_argument('--teacher_forcing', type=int, default=5, help='Number of epochs where teacher forcing is used')
-    parser.add_argument('--name', type=str,default="",help="Name of the run on OneDB")    
+    parser.add_argument('--name', type=str,default="",help="Name of the run on OneDB")
+    parser.add_argument('--dataset', type=str, default="all", help="Config name of the datasets to use")    
     args = parser.parse_args()
     return args
 
@@ -88,27 +90,26 @@ if __name__ == "__main__":
     dim_head = args.dim_head
     n_epoch = args.n_epoch
     teacher_forcing = args.teacher_forcing
-    name = args.name
+    data_config = args.dataset
+    name = args.name if args.name != "" else " ".join([data_config, model_dimension, sched, "block size " + str(block_size)])
 
     device = device = f'cuda:{gpu}' if torch.cuda.is_available() else 'cpu'
 
     size = f"{img_size}_{img_size}_{block_size}"
-    #folders = [f"bookstore/video{k}/" for k in range(1)]
-    #folders += [f"coupa/video{k}/" for k in range(4)]
-    #folders += [f"quad/video{k}/" for k in range(2)]
-    #folders += [f"gates/video{k}/" for k in range(9)]
-    folders  = [f"deathCircle/video{k}/" for k in range(1,2)]
-    #folders += [f"little/video{k}/" for k in range(4)]
-    #folders += [f"nexus/video{k}/" for k in range(10)]
+    folders = TrajDataset.conf_to_folders(data_config)
 
-    n_trajs = [(0, -1) for k in range(len(folders))]
     data_folders = ["/waldo/walban/student_datasets/arfranck/SDD/scenes/" + folder + size for folder in folders]
     
-    dataset = TrajDataset(data_folders, n_trajs=n_trajs, n_prev=n_prev, n_next=n_next, img_step=img_step)
-    train_data, validation_data, test_data = random_split(dataset, [train_prop, val_prop, test_prop],generator=torch.Generator().manual_seed(42))
-    
+    #dataset = TrajDataset(data_folders, trajs_index=trajs_index, n_prev=n_prev, n_next=n_next, img_step=img_step)
+    #train_data, validation_data, test_data = random_split(dataset, [train_prop, val_prop, test_prop],generator=torch.Generator().manual_seed(42))
+
+    props = [train_prop, val_prop, test_prop]
+    train_data = TrajDataset(data_folders, n_prev=n_prev, n_next=n_next, img_step=img_step, prop=props, part=0)
+    val_data = TrajDataset(data_folders, n_prev=n_prev, n_next=n_next, img_step=img_step, prop=props, part=1)
+    test_data = TrajDataset(data_folders, n_prev=n_prev, n_next=n_next, img_step=img_step, prop=props, part=2)
+
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(validation_data, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
 
     model = SimpleViT(image_size=img_size, image_patch_size=patch_size, frames=n_prev,
@@ -147,6 +148,7 @@ if __name__ == "__main__":
             "test_length": len(test_loader),
             "heads": n_heads,
             "name" : name,
+            "dataset" : data_config,
         }
     configuration = {
 

@@ -3,7 +3,8 @@ import torch
 from torch import nn, Tensor
 from torch.utils.data import dataset, DataLoader, Subset
 from torchvision import transforms
-
+import random
+import numpy as np
 from PIL import Image
 
 class TrajDataset(dataset.Dataset):
@@ -11,31 +12,31 @@ class TrajDataset(dataset.Dataset):
     to_tensor = transforms.ToTensor()
     # cols = ["track_id", "xmin", "ymin", "xmax", "ymax", "frame", "lost", "occluded", "generated", "label"]
 
-    def __init__(self, data_folders, n_prev, n_next, img_step, n_trajs):
+    def __init__(self, data_folders, n_prev, n_next, img_step, prop, part=0):
 
         self.data_folders = data_folders
         self.n_prev = n_prev
         self.n_next = n_next
         self.img_step = img_step
-        self.n_trajs = n_trajs
-
-        self.src = Tensor()
-        self.coords = Tensor()
-        self.tgt = Tensor()
-        self.process_data()
         self.block_size = int(data_folders[0].split("_")[-1])
 
-    def process_data(self):
-        src = []
-        coords = []
-        tgt = []
+        rand = random.Random(42)
 
-        for folder, (first_traj, last_traj) in zip(self.data_folders, self.n_trajs):
+        src = []
+        tgt = []
+        coords = []
+        for folder in self.data_folders:
             raw_data = pd.read_csv(folder + "/annotations_" + str(self.img_step) + ".txt", sep=" ")
+            # filter out occluded
+            raw_data = raw_data[raw_data['occluded'] != 1] # removes occluded
             # print(raw_data)
             # raw_data = raw_data[raw_data.index % self.img_step == 0]
 
-            track_ids = raw_data["track_id"].unique()[first_traj:last_traj]
+            all_ids = raw_data["track_id"].unique()
+            rand.shuffle(all_ids)
+            split_index = (len(all_ids) * np.cumsum(prop)).astype(int)
+            trajs_index = np.split(all_ids, split_index[:-1])[part]
+            track_ids = raw_data["track_id"].unique()[trajs_index]
 
             for track_id in track_ids:
                 print("opening track " + str(track_id) + " from " + folder)
@@ -97,3 +98,37 @@ class TrajDataset(dataset.Dataset):
                 "n_next": self.n_next,
                 "block_size": self.block_size
                 }
+    
+    @classmethod
+    def conf_to_folders(cls, confname):
+        match confname:
+            case "biggest" | "dc1" | "deathcicle1":
+                return ["deathCircle/video1/"]
+            case "sec_biggest" | "dc3" | "deathcicle3":
+                return ["deathCircle/video3/"]
+            case "third_biggest" | "n1" | "nexus1":
+                return ["nexus/video1/"]
+            case "b0" | "bookstore0":
+                return ["bookstore/video0/"]
+            case "all":
+                folders = [f"bookstore/video{k}/" for k in range(7)]
+                folders += [f"coupa/video{k}/" for k in range(4)]
+                folders += [f"deathCircle/video{k}/" for k in range(5)]
+                folders += [f"gates/video{k}/" for k in range(9)]
+                folders += [f"hyang/video{k}/" for k in range(15)]
+                folders += [f"little/video{k}/" for k in range(4)]
+                folders += [f"nexus/video{k}/" for k in range(12)]
+                folders += [f"quad/video{k}/" for k in range(4)]
+                return folders
+            case _:
+                raise Exception("Dataset config name not recognized")
+
+
+    #folders = [f"bookstore/video{k}/" for k in range(7)]
+    #folders += [f"coupa/video{k}/" for k in range(4)]
+    #folders += [f"deathCircle/video{k}/" for k in range(5)]
+    #folders += [f"gates/video{k}/" for k in range(9)]
+    #folders += [f"hyang/video{k}/" for k in range(15)]
+    #folders += [f"little/video{k}/" for k in range(4)]
+    #folders += [f"nexus/video{k}/" for k in range(12)]
+    #folders += [f"quad/video{k}/" for k in range(4)]
