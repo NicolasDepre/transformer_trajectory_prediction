@@ -2,3 +2,6 @@
 SDD/datasets
 SDD/README
 *__pycache__*
+SDD/plots/*
+SDD/models/*
+.ipynb_checkpoints/
