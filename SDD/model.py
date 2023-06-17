@@ -120,9 +120,11 @@ class SimpleViT(nn.Module):
             nn.Linear(patch_dim, dim),
             nn.LayerNorm(dim),
         ).to(self.device)
+        
+        
 
-        self.transformer = Transformer(dim, depth, heads, dim_head, mlp_dim).to(self.device)
-
+        self.encoderLayer = nn.TransformerEncoderLayer(dim,nhead=heads,dim_feedforward=mlp_dim).to(self.device)
+        self.encoder = nn.TransformerEncoder(self.encoderLayer,num_layers=depth).to(self.device)
         self.myNet = nn.Linear(dim,2).to(self.device)
 
         self.decoderLayer = nn.TransformerDecoderLayer(d_model=dim,nhead=heads,batch_first=True).to(self.device)
@@ -141,7 +143,7 @@ class SimpleViT(nn.Module):
         pe = posemb_sincos_3d(x)
         x = rearrange(x, 'b ... d -> b (...) d') + pe
 
-        x = self.transformer(x)
+        x = self.encoder(x)
 
         x = self.generate_sequence(tgt,x,train)
         output = x
@@ -175,6 +177,7 @@ class SimpleViT(nn.Module):
         output = self.decoder(tgt=tgt,memory=memory,tgt_mask=mask)
 
         return output
+
 
 
 
