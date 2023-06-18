@@ -3,3 +3,6 @@ SDD/datasets
 SDD/README
 *__pycache__*
 *.ipynb_checkpoints/
+SDD/plots/*
+SDD/models/*
+SDD/wandb/*
