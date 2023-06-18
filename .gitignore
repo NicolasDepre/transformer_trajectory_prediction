@@ -5,3 +5,4 @@ SDD/README
 *.ipynb_checkpoints/
 SDD/plots/*
 SDD/models/*
+SDD/wandb/*
