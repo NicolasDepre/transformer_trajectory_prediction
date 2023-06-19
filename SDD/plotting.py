@@ -8,7 +8,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Produce plots from wandb data')
 
     parser.add_argument('--title', type=str, help='Title of the plot')
-    parser.add_argument('--tags', type=str, default='exp_dim_model', help='Tags to get from wandb')
+    parser.add_argument('--tags', type=str,  help='Tags to get from wandb', required=True)
     parser.add_argument('--to_plot', type=str, default='val_loss', help='Information to plot')
     parser.add_argument('--yscale', type=str, default='log', help='Scale of the y axis in the plot')
     parser.add_argument('--samples', type=int, default=2000, help="Number of samples to download from wandb for the plot")
