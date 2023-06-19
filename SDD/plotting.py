@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import os
+import wandb
+
 
 def make_plot(title, training, validation=None, ylim=None):
     try:
@@ -75,3 +77,36 @@ def flat_list(lst):
     except Exception as e:
         print(e)
         return lst
+
+import pandas as pd
+
+#endpoint = "/depren/thesis_official_runs/runs/"
+#run_ids = ["dmn0il2i"]
+#runs = [api.run(endpoint + id) for id in run_ids]
+#histories = [run.history().sort_values(['_step']) for run in runs]
+
+if __name__ == "__main__":
+    title = "Smoothed validation loss"
+    tags = 'exp_dim_model'
+    to_plot = "val_loss"
+    yscale = "log"
+
+    project = "thesis_official_runs"
+    api = wandb.Api()
+    runs = api.runs(path=project, filters={'tags': tags})
+    complete_history = False
+    for run in runs:
+        if complete_history:
+            hist = pd.DataFrame(run.scan_history(keys=['_step', to_plot])) # complete history
+        else:
+            hist = run.history(samples=25000, keys=['_step', to_plot]).sort_values(['_step'])
+        #smoothed = data[col].ewm(alpha=0.1)
+        print(hist)
+        hist['smoothed'] = hist[to_plot].ewm(alpha=0.01, adjust=False).mean()
+
+        plt.plot(hist['_step'], hist['smoothed'], label=run.config['name'])
+
+    plt.title(title)
+    plt.legend()
+    plt.yscale(yscale)
+    plt.show()
