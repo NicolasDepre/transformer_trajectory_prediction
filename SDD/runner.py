@@ -140,6 +140,7 @@ if __name__ == "__main__":
             "lr": lr,
             "teacher_forcing": teacher_forcing,
             "image_size": img_size,
+            "block_size": block_size,
             "patch_size": patch_size,
             "n_prev": n_prev,
             "n_next": n_next,
