@@ -10,7 +10,7 @@ TODO
 """
 class Trainer:
 
-    def __init__(self,model,device,train_data,test_data,val_data,criterion,optimizer,epochs,lr,wandb_config,teacher_forcing=False):
+    def __init__(self,model,device,train_data,test_data,val_data,criterion,optimizer,scheduler, epochs,lr,wandb_config,teacher_forcing=False):
 
         self.model = model
         self.device = device
@@ -19,7 +19,7 @@ class Trainer:
         self.val_data = val_data
         self.criterion = criterion
         self.optimizer = optimizer
-        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, [10, 30], gamma=0.1)
+        self.scheduler = scheduler
         self.epochs = epochs
         self.teacher_forcing = teacher_forcing
 
@@ -96,7 +96,7 @@ class Trainer:
             if epoch % 1 == 0:
                 torch.save(model.state_dict(), self.save_name,_use_new_zipfile_serialization=False)
             self.validation()
-            #scheduler.step()
+            scheduler.step()
 
         self.test()
         torch.save(model.state_dict(), self.save_name,_use_new_zipfile_serialization=False)

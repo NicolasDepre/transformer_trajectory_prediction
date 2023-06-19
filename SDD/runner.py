@@ -59,9 +59,9 @@ def parse_args():
     parser.add_argument('--teacher_forcing', type=int, default=5, help='Number of epochs where teacher forcing is used')
     parser.add_argument('--name', type=str,default="",help="Name of the run on OneDB")
     parser.add_argument('--dataset', type=str, default="all", help="Config name of the datasets to use")    
+    parser.add_argument('--scheduler', type=str, default="fixed", help="Config name of the datasets to use")
     args = parser.parse_args()
     return args
-
 
 
 if __name__ == "__main__":
@@ -91,8 +91,8 @@ if __name__ == "__main__":
     n_epoch = args.n_epoch
     teacher_forcing = args.teacher_forcing
     data_config = args.dataset
-    scheduler = " "
-    name = args.name if args.name != "" else " ".join([data_config, model_dimension, scheduler, "block size " + str(block_size)])
+    scheduler_config = args.scheduler
+    name = args.name if args.name != "" else " ".join([data_config, model_dimension, scheduler_config])
 
     device = device = f'cuda:{gpu}' if torch.cuda.is_available() else 'cpu'
 
@@ -125,6 +125,23 @@ if __name__ == "__main__":
         optimizer = Adagrad(model.parameters(), lr=lr)
     else:
         raise Exception(f"Optimiser {optimizer} is not handled")
+
+    match scheduler_config:
+        case 'fixed':
+            scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda epoch: 1)  # lr doesn't change over time
+        case 'multistep_10_30':
+            scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [10, 30], gamma=0.1)
+        case 'multistep_10_30_60':
+            scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [10, 30, 60], gamma=0.1)
+        case 'step_80':
+            scheduler = torch.optim.lr_scheduler.StepLR(optimizer, gamma=0.80)
+        case 'step_90':
+            scheduler = torch.optim.lr_scheduler.StepLR(optimizer, gamma=0.90)
+        case 'step_95':
+            scheduler = torch.optim.lr_scheduler.StepLR(optimizer, gamma=0.95)
+        case _:
+            raise Exception(f"Scheduler configuration '{scheduler_config}' not recognized")
+
     mse = MSELoss()
     criterion = MSELoss()
 
@@ -149,8 +166,9 @@ if __name__ == "__main__":
             "val_length": len(val_loader),
             "test_length": len(test_loader),
             "heads": n_heads,
-            "name" : name,
-            "dataset" : data_config,
+            "name": name,
+            "dataset": data_config,
+            "scheduler": scheduler_config,
         }
     configuration = {
 
@@ -161,6 +179,7 @@ if __name__ == "__main__":
         "val_data": val_loader,
         "criterion": criterion,
         "optimizer": optimizer,
+        "scheduler": scheduler,
         "epochs": n_epoch,
         "lr": lr,
         "teacher_forcing": teacher_forcing,
