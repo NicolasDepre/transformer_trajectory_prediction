@@ -7,16 +7,18 @@ import argparse
 def parse_args():
     parser = argparse.ArgumentParser(description='Produce plots from wandb data')
 
-    parser.add_argument('--title', type=str, help='Title')
-    parser.add_argument('--tags', type=str, default='exp_dim_model', help='Tags')
-    parser.add_argument('--to_plot', type=str, default='val_loss', help='To plot')
-    parser.add_argument('--yscale', type=str, default='log', help='Yscale')
-    parser.add_argument('--samples', type=int, default=2000, help="Number of samples to download from wandb")
+    parser.add_argument('--title', type=str, help='Title of the plot')
+    parser.add_argument('--tags', type=str, default='exp_dim_model', help='Tags to get from wandb')
+    parser.add_argument('--to_plot', type=str, default='val_loss', help='Information to plot')
+    parser.add_argument('--yscale', type=str, default='log', help='Scale of the y axis in the plot')
+    parser.add_argument('--samples', type=int, default=2000, help="Number of samples to download from wandb for the plot")
 
-    parser.add_argument('--smoothed', action='store_true')
-    parser.add_argument('--not_smoothed', dest='smoothed', action='store_false')
+    parser.add_argument('--smoothed', action='store_true', help="If needs to be smoothed")
+    parser.add_argument('--not_smoothed', dest='smoothed', action='store_false', help="If should not be smoothed")
     parser.set_defaults(smoothed=True)
     parser.add_argument('--smoothing', type=float, default=0.01, help='Alpha factor of smoothing')
+
+    parser.add_argument('--label_format', type=str, help="Format given to the labels of the curves")
 
     args = parser.parse_args()
     return args
@@ -50,6 +52,12 @@ def save_plot(filename, plt):
             filename = filename.replace(".pdf", "_bis.pdf")
     return
 
+def get_label(run, label_format):
+    if label_format is None:
+        return run.config['name']
+    label = label_format.replace("{", "{run.config['").replace("}", "']}")
+    return eval("f\"" + label + "\"")
+
 if __name__ == "__main__":
     args = parse_args()
 
@@ -61,6 +69,7 @@ if __name__ == "__main__":
     complete_history = True if samples == -1 else False
     smoothed = args.smoothed
     alpha = args.smoothing
+    label_format = args.label_format
 
     project = "thesis_official_runs"
     api = wandb.Api()
@@ -72,10 +81,11 @@ if __name__ == "__main__":
             hist = run.history(samples=samples, keys=['_step', to_plot]).sort_values(['_step'])
         hist['smoothed'] = hist[to_plot].ewm(alpha=alpha, adjust=False).mean()
         data_to_plot = hist['smoothed'] if smoothed else hist[to_plot]
-        plt.plot(hist['_step'], data_to_plot, label=run.config['name'])
-
+        plt.plot(hist['_step'], data_to_plot, label=get_label(run, label_format))
+        
     plt.title(title)
     plt.legend()
     plt.yscale(yscale)
     save_plot(f"plots/{tags}_{to_plot}.pdf", plt)
     plt.show()
+
