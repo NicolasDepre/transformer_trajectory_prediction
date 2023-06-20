@@ -1,8 +1,8 @@
-import matplotlib.pyplot as plt
-import os
 import wandb
 import pandas as pd
 import argparse
+import matplotlib.pyplot as plt
+plt.style.use('tableau-colorblind10')
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Produce plots from wandb data')
@@ -59,6 +59,7 @@ def get_label(run, label_format):
         return run.config['name']
     label = label_format.replace("{", "{run.config['").replace("}", "']}")
     return eval("f\"" + label + "\"")
+
 
 if __name__ == "__main__":
     args = parse_args()
