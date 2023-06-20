@@ -28,11 +28,11 @@ class TrajDataset(dataset.Dataset):
         for folder in self.data_folders:
             raw_data = pd.read_csv(folder + "/annotations_" + str(self.img_step) + ".txt", sep=" ")
             # filter out occluded
-            raw_data = raw_data[raw_data['occluded'] != 1] # removes occluded
+            #raw_data = raw_data[raw_data['occluded'] != 1] # removes occluded
             # print(raw_data)
             # raw_data = raw_data[raw_data.index % self.img_step == 0]
 
-            all_ids = raw_data["track_id"].unique()
+            all_ids = raw_data[raw_data['occluded'] != 1]["track_id"].unique()
             rand.shuffle(all_ids)
             split_index = (len(all_ids) * np.cumsum(prop)).astype(int)
             trajs_index = np.split(all_ids, split_index[:-1])[part]
