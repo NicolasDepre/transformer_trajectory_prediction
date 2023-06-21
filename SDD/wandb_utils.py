@@ -9,5 +9,5 @@ runs = api.runs(path=project)
 
 for run in runs:
     print(run)
-    run.config['img_step'] = 30
+    #run.config['block_size'] = 4
     run.update()
