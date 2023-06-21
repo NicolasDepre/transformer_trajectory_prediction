@@ -39,7 +39,7 @@ for scene, video, *infos in all_stats:
 #stats = stats.sort_values(["Prop pedestrians", "Scene", "Video"])
 stats = stats.sort_values(["Scene", "Video"])
 print(stats)
-stats.to_csv('videos_sizes.csv')
-#print(stats.to_latex(bold_rows = True, longtable=True, multirow=True, column_format='|l|c|r|r|', caption="Statistics of the Stanford Drone Dataset", label="sdd_stats"))
+#stats.to_csv('videos_sizes.csv')
+print(stats.to_latex(bold_rows=True, longtable=True, multirow=True, column_format='|l|c|r|r|r|r|r|', caption="Statistics of the Stanford Drone Dataset", label="tab:full-sdd-stats"))
 
 exit(0)
