@@ -110,6 +110,16 @@ class TrajDataset(dataset.Dataset):
                 return ["nexus/video1/"]
             case "b0" | "bookstore0":
                 return ["bookstore/video0/"]
+            case "every_biggest":
+                folders = [f"bookstore/video0/"]
+                folders += [f"coupa/video3/"]
+                folders += [f"deathCircle/video1/"]
+                folders += [f"gates/video3/"]
+                folders += [f"hyang/video4/"]
+                folders += [f"little/video3/"]
+                folders += [f"nexus/video2/"]
+                folders += [f"quad/video2/"]
+                return folders
             case "all":
                 folders = [f"bookstore/video{k}/" for k in range(7)]
                 folders += [f"coupa/video{k}/" for k in range(4)]
