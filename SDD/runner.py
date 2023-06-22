@@ -92,7 +92,7 @@ if __name__ == "__main__":
     teacher_forcing = args.teacher_forcing
     data_config = args.dataset
     scheduler_config = args.scheduler
-    name = args.name if args.name != "" else " ".join([data_config, model_dimension, scheduler_config])
+    name = args.name if args.name != "" else f"{data_config} dim {model_dimension} sched {scheduler_config} epochs {n_epoch}"
 
     device = device = f'cuda:{gpu}' if torch.cuda.is_available() else 'cpu'
 

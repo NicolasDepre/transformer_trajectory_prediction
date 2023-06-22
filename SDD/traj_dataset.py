@@ -12,7 +12,7 @@ class TrajDataset(dataset.Dataset):
     to_tensor = transforms.ToTensor()
     # cols = ["track_id", "xmin", "ymin", "xmax", "ymax", "frame", "lost", "occluded", "generated", "label"]
 
-    def __init__(self, data_folders, n_prev, n_next, img_step, prop, part=0):
+    def __init__(self, data_folders, n_prev, n_next, img_step, prop, part=0,limit=None):
 
         self.data_folders = data_folders
         self.n_prev = n_prev
@@ -36,7 +36,7 @@ class TrajDataset(dataset.Dataset):
             rand.shuffle(all_ids)
             split_index = (len(all_ids) * np.cumsum(prop)).astype(int)
             trajs_index = np.split(all_ids, split_index[:-1])[part]
-            track_ids = raw_data["track_id"].unique()[trajs_index]
+            track_ids = raw_data["track_id"].unique()[trajs_index][:limit]
 
             for track_id in track_ids:
                 print("opening track " + str(track_id) + " from " + folder)
@@ -52,7 +52,6 @@ class TrajDataset(dataset.Dataset):
                     # images that should be predicted
                     y = traj.iloc[i + self.n_prev: i + self.n_prev + self.n_next][["x", "y"]]  # recuperer le grand truth à prédire
                     tgt.append(Tensor(y.values)) # add to ground truth dataset
-
         self.src = torch.stack(src, dim=0)
         self.coords = self.normalize_coords(torch.stack(coords, dim=0))
         self.tgt = self.normalize_coords(torch.stack(tgt, dim=0))

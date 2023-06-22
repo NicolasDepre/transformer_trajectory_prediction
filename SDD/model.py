@@ -123,8 +123,8 @@ class SimpleViT(nn.Module):
         
         
 
-        self.encoderLayer = nn.TransformerEncoderLayer(dim,nhead=heads,dim_feedforward=mlp_dim).to(self.device)
-        self.encoder = nn.TransformerEncoder(self.encoderLayer,num_layers=depth, batch_first=True).to(self.device)
+        self.encoderLayer = nn.TransformerEncoderLayer(dim,nhead=heads,dim_feedforward=mlp_dim, batch_first=True).to(self.device)
+        self.encoder = nn.TransformerEncoder(self.encoderLayer,num_layers=depth).to(self.device)
         self.myNet = nn.Linear(dim,2).to(self.device)
 
         self.decoderLayer = nn.TransformerDecoderLayer(d_model=dim,nhead=heads,batch_first=True).to(self.device)
