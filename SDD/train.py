@@ -26,7 +26,7 @@ class Trainer:
         self.loss_evolution = []
         self.test_evolution = []
         self.validation_evolution = []
-        self.save_name = f"/waldo/walban/student_datasets/arfranck/model_saves/epochs_{epochs}_lr_{lr}-{datetime.now().strftime('%d-%m-%Y-%H:%M:%S')}.dict"
+        self.save_name = f"/waldo/walban/student_datasets/arfranck/model_saves/dim_{model.dim}_epochs_{epochs}_lr_{lr}-{datetime.now().strftime('%d-%m-%Y-%H:%M:%S')}.dict"
 
         wandb_config["save_name"] = self.save_name
         print("Init Wandb")
