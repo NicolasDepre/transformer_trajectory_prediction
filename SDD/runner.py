@@ -27,7 +27,7 @@ Args:
     14) patch_depth
     15) model_depth
     16) n_heads
-    17) mlp_dim 
+    17) mlp_dim
     18) dim_head
     19) n_epoch
     20) teacher_forcing
@@ -58,7 +58,7 @@ def parse_args():
     parser.add_argument('--n_epoch', type=int, default=100, help='Number of epochs to train the model')
     parser.add_argument('--teacher_forcing', type=int, default=5, help='Number of epochs where teacher forcing is used')
     parser.add_argument('--name', type=str,default="",help="Name of the run on OneDB")
-    parser.add_argument('--dataset', type=str, default="all", help="Config name of the datasets to use")    
+    parser.add_argument('--dataset', type=str, default="all", help="Config name of the datasets to use")
     parser.add_argument('--scheduler', type=str, default="fixed", help="Config name of the datasets to use")
     args = parser.parse_args()
     return args
@@ -134,11 +134,11 @@ if __name__ == "__main__":
         case 'multistep_10_30_60':
             scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [10, 30, 60], gamma=0.1)
         case 'step_80':
-            scheduler = torch.optim.lr_scheduler.StepLR(optimizer, gamma=0.80)
+            scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.80)
         case 'step_90':
-            scheduler = torch.optim.lr_scheduler.StepLR(optimizer, gamma=0.90)
+            scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.90)
         case 'step_95':
-            scheduler = torch.optim.lr_scheduler.StepLR(optimizer, gamma=0.95)
+            scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.95)
         case _:
             raise Exception(f"Scheduler configuration '{scheduler_config}' not recognized")
 
