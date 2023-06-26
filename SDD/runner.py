@@ -92,7 +92,7 @@ if __name__ == "__main__":
     teacher_forcing = args.teacher_forcing
     data_config = args.dataset
     scheduler_config = args.scheduler
-    name = args.name if args.name != "" else f"{data_config} dim {model_dimension} sched {scheduler_config} epochs {n_epoch}"
+    name = args.name if args.name != "" else f"{data_config} dim {model_dimension} mlp {mlp_dim} sched {scheduler_config}"
 
     device = device = f'cuda:{gpu}' if torch.cuda.is_available() else 'cpu'
 
@@ -126,6 +126,9 @@ if __name__ == "__main__":
     else:
         raise Exception(f"Optimiser {optimizer} is not handled")
 
+
+    def noam_lr(step, model_size, warmup_steps):
+            return (model_size ** (-0.5) * min(step ** (-0.5), step * warmup_steps ** (-1.5)))
     match scheduler_config:
         case 'fixed':
             scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda epoch: 1)  # lr doesn't change over time
@@ -139,6 +142,8 @@ if __name__ == "__main__":
             scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.90)
         case 'step_95':
             scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.95)
+        case 'noam':
+            scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer,lr_lambda=lambda step: noam_lr(step,model_dimension,int(len(train_loader)*n_epoch*0.05))) 
         case _:
             raise Exception(f"Scheduler configuration '{scheduler_config}' not recognized")
 
