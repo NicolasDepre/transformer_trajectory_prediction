@@ -128,24 +128,25 @@ if __name__ == "__main__":
 
 
     def noam_lr(step, model_size, warmup_steps):
-            return (model_size ** (-0.5) * min(step ** (-0.5), step * warmup_steps ** (-1.5)))
-    match scheduler_config:
-        case 'fixed':
-            scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda epoch: 1)  # lr doesn't change over time
-        case 'multistep_10_30':
-            scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [10, 30], gamma=0.1)
-        case 'multistep_10_30_60':
-            scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [10, 30, 60], gamma=0.1)
-        case 'step_80':
-            scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.80)
-        case 'step_90':
-            scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.90)
-        case 'step_95':
-            scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.95)
-        case 'noam':
-            scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer,lr_lambda=lambda step: noam_lr(step,model_dimension,int(len(train_loader)*n_epoch*0.05))) 
-        case _:
-            raise Exception(f"Scheduler configuration '{scheduler_config}' not recognized")
+            return 0 if step==0 else  (model_size ** (-0.5) * min(step ** (-0.5), step * (warmup_steps ** (-1.5))))
+  
+    if scheduler_config == 'fixed':
+        scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda epoch: 1)  # lr doesn't change over time
+    elif scheduler_config == 'multistep_10_30':
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [10, 30], gamma=0.1)
+    elif scheduler_config == 'multistep_10_30_60':
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [10, 30, 60], gamma=0.1)
+    elif scheduler_config == 'step_80':
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.80)
+    elif scheduler_config == 'step_90':
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.90)
+    elif scheduler_config == 'step_95':
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.95)
+    elif scheduler_config == 'noam':
+        optimizer = Adam(model.parameters(), lr=0.001, betas=(0.9, 0.98), eps=1e-9) 
+        scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda step: noam_lr(step, model_dimension, int(len(train_loader) * n_epoch * 0.025)))
+    else:
+        raise Exception(f"Scheduler configuration '{scheduler_config}' not recognized")
 
     mse = MSELoss()
     criterion = MSELoss()
