@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 from torch import nn
-
+import math
 from einops import rearrange
 from einops.layers.torch import Rearrange
 
@@ -94,8 +94,24 @@ class Transformer(nn.Module):
             x = ff(x) + x
         return x
 
+# https://discuss.pytorch.org/t/how-to-modify-the-positional-encoding-in-torch-nn-transformer/104308/2
+class PositionalEncoding(nn.Module):
 
+    def __init__(self, d_model, dropout=0.1, max_len=5000):
+        super(PositionalEncoding, self).__init__()
+        self.dropout = nn.Dropout(p=dropout)
 
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        pe = pe.unsqueeze(0).transpose(0, 1)
+        self.register_buffer('pe', pe)
+
+    def forward(self, x):
+        x = x + self.pe[:x.size(0), :]
+        return self.dropout(x)
 
 class SimpleViT(nn.Module):
 
@@ -121,7 +137,7 @@ class SimpleViT(nn.Module):
             nn.LayerNorm(dim),
         ).to(self.device)
         
-        
+        self.pe = PositionalEncoding(1024).to(self.device)
 
         self.encoderLayer = nn.TransformerEncoderLayer(dim,nhead=heads,dim_feedforward=mlp_dim, batch_first=True).to(self.device)
         self.encoder = nn.TransformerEncoder(self.encoderLayer,num_layers=depth).to(self.device)
@@ -173,7 +189,7 @@ class SimpleViT(nn.Module):
 
         mask = torch.ones((tgt.shape[0]*self.nheads, tgt.shape[1], tgt.shape[1])).to(self.device)
         mask = mask.masked_fill(torch.tril(torch.ones((tgt.shape[1], tgt.shape[1])).to(self.device)) == 0, float('-inf'))
-
+        tgt = self.pe(tgt)
         output = self.decoder(tgt=tgt,memory=memory,tgt_mask=mask)
 
         return output
