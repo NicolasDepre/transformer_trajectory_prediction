@@ -83,7 +83,7 @@ class Trainer:
                 loss_evolution.append(loss.item())
                 loss.backward()
                 optimizer.step()
-
+                scheduler.step() #COMMENT IF NOT NOAM
                 wandb.log(
                     {
                         "train_loss": loss,
@@ -93,13 +93,16 @@ class Trainer:
                 )
 
             self.loss_evolution.append(loss_evolution)
-            if epoch % 1 == 0:
+            if epoch % 10 == 0:
                 torch.save(model.state_dict(), self.save_name,_use_new_zipfile_serialization=False)
             self.validation()
             scheduler.step()
 
         self.test()
-        torch.save(model.state_dict(), self.save_name,_use_new_zipfile_serialization=False)
+        try:
+            torch.save(model.state_dict(), self.save_name,_use_new_zipfile_serialization=False)
+        except:
+            print("Could not save model")
         #model_scripted = torch.jit.script(model) # Export to TorchScript
         #model_scripted.save(self.save_name) # Save
 

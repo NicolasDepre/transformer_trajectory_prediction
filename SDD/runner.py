@@ -5,9 +5,11 @@ from traj_dataset import TrajDataset
 from torch.utils.data import random_split, DataLoader
 from torch.optim import *
 from torch.nn import MSELoss
+from noam import NoamLR
 import torch
 import argparse
 import pandas as pd
+
 
 """
 Args:
@@ -127,13 +129,11 @@ if __name__ == "__main__":
         raise Exception(f"Optimiser {optimizer} is not handled")
 
 
-    def noam_lr(step, model_size, warmup_steps):
-            return 0 if step==0 else  (model_size ** (-0.5) * min(step ** (-0.5), step * (warmup_steps ** (-1.5))))
   
     if scheduler_config == 'fixed':
         scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda epoch: 1)  # lr doesn't change over time
-    elif scheduler_config == 'multistep_10_30':
-        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [10, 30], gamma=0.1)
+    elif scheduler_config == 'multistep_30_60':
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [30, 60], gamma=0.1)
     elif scheduler_config == 'multistep_10_30_60':
         scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [10, 30, 60], gamma=0.1)
     elif scheduler_config == 'step_80':
@@ -142,9 +142,10 @@ if __name__ == "__main__":
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.90)
     elif scheduler_config == 'step_95':
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.95)
+
     elif scheduler_config == 'noam':
         optimizer = Adam(model.parameters(), lr=0.001, betas=(0.9, 0.98), eps=1e-9) 
-        scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda step: noam_lr(step, model_dimension, int(len(train_loader) * n_epoch * 0.025)))
+        scheduler = NoamLR(optimizer, model_dimension, int(len(train_loader) * n_epoch * 0.05))
     else:
         raise Exception(f"Scheduler configuration '{scheduler_config}' not recognized")
 
